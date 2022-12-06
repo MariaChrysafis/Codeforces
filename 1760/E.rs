@@ -32,27 +32,22 @@ fn main() {
     let out = &mut BufWriter::new(stdout());
 
     for _ in 0..(scan.next::<usize>()) {
-        let n = scan.next::<usize>();
+        let n = scan.next();
         let mut v: Vec<i64> = Vec::new();
-        let mut sum: i64 = 0;
         for i in 0..n {
-            v.push(scan.next::<i64>());
-            sum += v.last().unwrap();
+            v.push(scan.next());
         }
         let mut pref: i64 = 0;
-        let mut suf: i64 = sum;
+        let mut suf: i64 = v.iter().sum();
         let mut inversions: i64 = 0;
         for (i, x) in v.iter().enumerate() {
             suf -= x;
             if *x == 0 {
                 inversions += pref;
-            } else {
-                inversions += n as i64 - i as i64 - 1 - suf;
-            }
+            } 
             pref += x;
         }
-        inversions /= 2;
-        suf = sum;
+        suf = v.iter().sum();
         pref = 0;
         let mut ans: i64 = inversions;
         for (i, x) in v.iter().enumerate() {
