@@ -95,36 +95,38 @@ fn main() {
                 false => car.push(h[i]),
             }
         }
-        let mut dp: Vec<Vec<Vec<bool>>> = vec![vec![vec![false; no_car.len() + 1]; (1 << no_car.len())]; (car.len() + 1)];
-        dp[0][0][0] = true;
+        let mut prev: Vec<Vec<bool>> = vec![vec![false; no_car.len() + 1]; (1 << no_car.len())];
+        prev[0][0] = true;
+        let mut cur: Vec<Vec<bool>> = prev.clone();
         let mut distance: Vec<Vec<usize>> = vec![Vec::new(); n];
         for i in 0..no_car.len() {
             distance[no_car[i]] = graph.min_distance(no_car[i]);
         }
         distance[0] = graph.min_distance(0);
         for i in 0..car.len() {
+            prev = cur.clone();
             let mut vis: Vec<bool> = vec![false; (1 << no_car.len())];
             vis[0] = true;
             for mask in 1..(1 << no_car.len()) as usize {
-                let mut guys: Vec<(usize, usize)> = Vec::new();
+                let mut guys: Vec<usize> = Vec::new();
                 for j in 0..no_car.len() {
                     if mask & (1 << j) != 0 {
-                        guys.push((distance[0][no_car[j]], j));
+                        guys.push(j);
                     }
                 }
-                guys.sort();
-                let mut tot = distance[0][no_car[guys[0].1]] + distance[no_car[guys.last().unwrap().1]][car[i]];
+                guys.sort_by(|a, b| distance[no_car[*a]].cmp(&distance[no_car[*b]]));
+                let x = guys.len() - 1;
+                let mut tot = distance[0][no_car[guys[0]]] + distance[no_car[guys[x]]][car[i]];
                 for x in 1..guys.len() {
-                    tot += distance[no_car[guys[x].1]][no_car[guys[x - 1].1]];
+                    tot += distance[no_car[guys[x]]][no_car[guys[x - 1]]];
                 }
                 vis[mask] = (tot == distance[0][car[i]]);
             }
-            dp[i + 1] = dp[i].clone();
             for mask in 0..(1 << no_car.len()) {
                 for guys in 1..(no_car.len() + 1) {
                     for prev_mask in 0..(1 << no_car.len()) {
                         if prev_mask & mask == prev_mask && vis[mask ^ prev_mask] {
-                            dp[i + 1][mask][guys] |= dp[i][prev_mask][guys - 1];
+                            cur[mask][guys] |= prev[prev_mask][guys - 1];
                         }
                     }
                 }
@@ -133,7 +135,7 @@ fn main() {
         let mut ans: i32 = 0;
         for x in 0..1 << no_car.len() {
             for y in 0..(no_car.len() + 1) {
-                if dp[car.len()][x][y] {
+                if cur[x][y] {
                     ans = max(ans, x.count_ones() as i32);
                 }
             }
