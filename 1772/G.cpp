@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -52,10 +53,6 @@ void solve () {
         }
         int64_t upd = 2 * (lo + 1) - n;
         x += upd;
-        if (x + (lo + 1) >= y) {
-            cout << (i + 1) * n + (y - x) << '\n';
-            return;
-        }
         int64_t gamma = (y - x - (lo + 1) + upd - 1)/upd;
         myMin = min((gamma + i + 1) * n + (y - (x + upd * gamma)), myMin);
         if (x >= pref[lo + 2]) {
